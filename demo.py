@@ -29,6 +29,6 @@ def validate_token():
 
 
 if __name__ == '__main__':
-    pass
+    app.run(debug=True)
 
 
