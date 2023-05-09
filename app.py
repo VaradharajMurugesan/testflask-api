@@ -1,5 +1,6 @@
 import os
 import mysql.connector
+import json
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for, jsonify)
 
@@ -16,12 +17,52 @@ def getConnection():
 
 @app.route('/Est_Getall',methods=['GET'])
 def Get_allEstID_tables():
-  try:
-      print("Testing the module est getdetails 1243 second run")   
-      return jsonify("Success1243 second run")
-  
-  except Exception as e:
-    return jsonify(e,"An ERROR occurred in table GET Method")
+    try:
+        con = getConnection()
+        cur = con.cursor()
+        cur.execute  (""" SELECT JSON_ARRAYAGG(  
+                                JSON_OBJECT(
+                                'estimatorID', e.estimatorID,
+                                'projectName', e.projectName,
+                                'estimatorName', e.estimatorName,
+                                'dashBoardName', e.dashBoardName,
+                                'totalEfforts_inPersonHours', e.totalEfforts_inPersonHours,
+                                'retestingEfforts', e.retestingEfforts,
+                                'totalEfforts_inPersonDays', e.totalEfforts_inPersonDays,
+                                'created_date',e.created_date,
+                                'updated_date',e.updated_date,
+                                'taskGroup', 
+                            (SELECT JSON_ARRAYAGG(
+                                JSON_OBJECT(
+                                        'taskGroup_id', tg.taskGroup_id, 
+                                        'taskGroupname', tg.taskGroupname,
+                                        'estimatorID',tg.estimatorID,
+                                        'created_date',tg.created_date,
+                                        'updated_date',tg.updated_date,
+                                        'tasks', 
+                                        (SELECT JSON_ARRAYAGG(
+                                            JSON_OBJECT(
+                                                'task_id', t.task_id, 
+                                                'taskName', t.taskName, 
+                                                'totalNum', t.totalNum, 
+                                                'totalPerUnit', t.totalPerUnit, 
+                                                'totalEffort', t.totalEffort,
+                                                'taskGroup_id',t.taskGroup_id,
+                                                'created_date',t.created_date,
+                                                'updated_date',t.updated_date
+                        )
+                    ) FROM tasks t where t.taskGroup_id =tg.taskGroup_id )
+                )
+        ) FROM taskGroup tg  WHERE tg.estimatorID = e.estimatorID )
+        )
+        )FROM estimator e """)
+        rows = cur.fetchall()
+        result_json_str=rows[0][0]
+        result_json = json.loads(result_json_str)
+        return jsonify(result_json)
+    
+    except Exception as e:
+        return jsonify(e,"An ERROR occurred in table GET Method")
 
 
 @app.route('/')
