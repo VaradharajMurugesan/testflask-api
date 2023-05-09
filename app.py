@@ -1,5 +1,4 @@
 import os
-
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for, jsonify)
 
@@ -8,7 +7,8 @@ app = Flask(__name__)
 
 @app.route('/Est_Getall',methods=['GET'])
 def Get_allEstID_tables():
-  try:      
+  try:
+      print("Testing the module est getdetail")   
       return jsonify("Success")
   
   except Exception as e:
