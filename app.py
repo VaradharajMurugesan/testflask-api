@@ -8,8 +8,8 @@ app = Flask(__name__)
 @app.route('/Est_Getall',methods=['GET'])
 def Get_allEstID_tables():
   try:
-      print("Testing the module est getdetails")   
-      return jsonify("Success")
+      print("Testing the module est getdetails 1243")   
+      return jsonify("Success1243")
   
   except Exception as e:
     return jsonify(e,"An ERROR occurred in table GET Method")
