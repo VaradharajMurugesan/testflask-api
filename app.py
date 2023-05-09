@@ -15,6 +15,38 @@ def getConnection():
 
     return con
 
+@app.route('/EST_User_Posting',methods=['POST'])
+def add_user1():
+    try:
+        projectName=request.json["projectName"]
+        estimatorName=request.json["estimatorName"]
+        dashBoardName=request.json["dashBoardName"]
+        totalEfforts_inPersonHours=request.json["totalEfforts_inPersonHours"]
+        retestingEfforts=request.json["retestingEfforts"]
+        totalEfforts_inPersonDays=request.json["totalEfforts_inPersonDays"]
+        taskGroup=request.json["taskGroup"]
+        con = getConnection()
+        cur = con.cursor()
+        sql="""INSERT INTO estimator(projectName,estimatorName,dashBoardName,totalEfforts_inPersonHours,retestingEfforts,totalEfforts_inPersonDays)
+            VALUES (%s,%s,%s,%s,%s,%s)"""
+        cur.execute(sql,(projectName,estimatorName,dashBoardName,totalEfforts_inPersonHours,retestingEfforts,totalEfforts_inPersonDays))
+        estimatorID=cur.lastrowid
+        for lst in taskGroup:   
+            cur.execute('INSERT INTO taskGroup(taskGroupName, estimatorID) VALUES (%s,%s)',
+                       (lst['taskGroupName'], estimatorID))
+            taskGroup_id=cur.lastrowid
+            for tsklist in lst["tasks"]:
+               cur.execute('INSERT INTO  tasks( taskName, totalNum, totalPerUnit, totalEffort, taskGroup_id) VALUES (%s,%s, %s,%s, %s)',
+                           ( tsklist['taskName'], tsklist['totalNum'], tsklist['totalPerUnit'], tsklist['totalEffort'],taskGroup_id))    #row_id = cursor.lastrowid
+        con.commit()
+        con.close()
+        values = request.get_json()
+        return jsonify("Added Parameters: ",values)
+    
+    except Exception as e:
+        return jsonify(e,"An ERROR occurred in table POST Method")
+
+
 @app.route('/Est_Getall',methods=['GET'])
 def Get_allEstID_tables():
     try:
