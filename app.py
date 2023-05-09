@@ -1,19 +1,12 @@
 import os
 import mysql.connector
 import json
+from data import DataBase
 from flask import (Flask, redirect, render_template, request,
                    send_from_directory, url_for, jsonify)
 
 app = Flask(__name__)
 
-
-def getConnection():
-    con = mysql.connector.connect(host='emergerejobcareer-mysql.mysql.database.azure.com',
-                                    database='estimator',
-                                    user='emergere',
-                                    password='password-1')   
-
-    return con
 
 @app.route('/EST_User_Posting',methods=['POST'])
 def add_user1():
@@ -25,7 +18,7 @@ def add_user1():
         retestingEfforts=request.json["retestingEfforts"]
         totalEfforts_inPersonDays=request.json["totalEfforts_inPersonDays"]
         taskGroup=request.json["taskGroup"]
-        con = getConnection()
+        con = DataBase.getConnection()
         cur = con.cursor()
         sql="""INSERT INTO estimator(projectName,estimatorName,dashBoardName,totalEfforts_inPersonHours,retestingEfforts,totalEfforts_inPersonDays)
             VALUES (%s,%s,%s,%s,%s,%s)"""
@@ -50,7 +43,7 @@ def add_user1():
 @app.route('/Est_Getall',methods=['GET'])
 def Get_allEstID_tables():
     try:
-        con = getConnection()
+        con = DataBase.getConnection()
         cur = con.cursor()
         cur.execute  (""" SELECT JSON_ARRAYAGG(  
                                 JSON_OBJECT(
@@ -99,7 +92,7 @@ def Get_allEstID_tables():
 @app.route('/getbyID_Estimator/<int:estimatorID>', methods=['GET'])
 def Get_byID_Estimator(estimatorID):
   try:
-      con = getConnection()
+      con = DataBase.getConnection()
       cur = con.cursor()
       cur.execute("SELECT * FROM estimator WHERE estimatorID = %s", [estimatorID])
       row = cur.fetchone()
@@ -165,7 +158,7 @@ def update_user1():
             totalEfforts_inPersonDays=lst["totalEfforts_inPersonDays"]
             updated_date=lst["updated_date"]
             taskGroup=lst["taskGroup"]
-            con = getConnection()
+            con = DataBase.getConnection()
             cur = con.cursor()
             cur.execute("SELECT * FROM estimator WHERE estimatorID = %s", [estimatorID])
             row = cur.fetchone()
@@ -204,7 +197,7 @@ def update_user1():
 @app.route('/delete_EST-Group',methods=['DELETE'])
 def delete_user1():
     try:
-        con = getConnection()
+        con = DataBase.getConnection()
         cur = con.cursor()
         data = request.get_json()
         estimatorID = data.get("estimatorID")
@@ -219,28 +212,6 @@ def delete_user1():
     
     except Exception as e:
         return jsonify(e,"An ERROR occurred in table DELETE Method")
-
-
-@app.route('/')
-def index():
-   print('Request for index page received')
-   return render_template('index.html')
-
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
-@app.route('/hello', methods=['POST'])
-def hello():
-   name = request.form.get('name')
-
-   if name:
-       print('Request for hello page received with name=%s' % name)
-       return render_template('hello.html', name = name)
-   else:
-       print('Request for hello page received with no name or blank name -- redirecting')
-       return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
