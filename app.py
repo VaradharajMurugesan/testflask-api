@@ -1,5 +1,5 @@
 import os
-import mysql.connector
+
 
 
 from flask import (Flask, redirect, render_template, request,
@@ -7,14 +7,6 @@ from flask import (Flask, redirect, render_template, request,
 
 app = Flask(__name__)
 
-
-def getConnection():
-    con = mysql.connector.connect(host='emergerejobcareer-mysql.mysql.database.azure.com',
-                                    database='estimator',
-                                    user='emergere',
-                                    password='password-1')   
-
-    return con
 
 @app.route('/Est_Getall',methods=['GET'])
 def Get_allEstID_tables():
