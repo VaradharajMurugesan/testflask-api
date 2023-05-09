@@ -1,9 +1,19 @@
 import os
 
+
 from flask import (Flask, redirect, render_template, request,
-                   send_from_directory, url_for)
+                   send_from_directory, url_for, jsonify)
 
 app = Flask(__name__)
+
+
+@app.route('/Est_Getall',methods=['GET'])
+def Get_allEstID_tables():
+  try:      
+      return jsonify("Success")
+  
+  except Exception as e:
+    return jsonify(e,"An ERROR occurred in table GET Method")
 
 
 @app.route('/')
